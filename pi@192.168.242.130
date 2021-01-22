@@ -115,18 +115,18 @@ def get_brightness_angle(ang1, ang2, fuzziness):
     dist = abs(ang1 - ang2)
     dist = dist if dist < math.pi else 2 * math.pi - dist
     return round(1 - math.tanh(dist * corr_factor), 2)
-
-def animate(
+    def animate(
     leds,
     mode,
     animation_speed,
     animation_fps,
     star_size,
     fuzziness=1,
-    seconds=None,
+    seconds=30,
     center_min_value=0,
-    boomerang=False
+    boomerang=False,
 ):
+    while True:
         if mode == "radial":
             min_blink_radius = -0.5  # For circles
             max_blink_radius = star_size * 1.3
@@ -136,7 +136,7 @@ def animate(
         elif mode == "angular":
             min_blink_radius = -math.pi  # -R*2
             max_blink_radius = math.pi  # R*2
-            blink_radius = min_blink_radius
+        blink_radius = min_blink_radius
         try:
             t_end = time()
             if seconds is not None:
@@ -196,38 +196,38 @@ def animate(
         except KeyboardInterrupt:
             star.close()
 
-if __name__ == "__main__":
-    star = Star(pwm=True)
-    R_BIG = 5  # Radius of the star towards the outer points (e.g. 5 cm)
-    seconds = [6, 7, 3, 4, 12]
-    for idx, mode in enumerate(["x", "y", "x", "radial", "angular"]):
-        if mode == "radial":
-            # r=2.5 if it needs to be realistic. For radial animations, r=1 is prettier.
-            R_SMALL = 1
-        else:
-            R_SMALL = 4
-        R_CENTER = (
-            R_SMALL - (R_BIG - R_SMALL) / 10
-        )  # Perceived radius of the center led circle for radial animations
-        FUZZINESS = 0.7
-        BOOMERANG = False
-        ANIMATION_SPEED = 0.6
-        CENTER_MIN_VALUE = 0.05
-        ANIMATION_FPS = 30
+    if __name__ == "__main__":
+        star = Star(pwm=True)
+        R_BIG = 5  # Radius of the star towards the outer points (e.g. 5 cm)
+        seconds = [6, 7, 3, 4, 12]
+        for idx, mode in enumerate(["x", "y", "x", "radial", "angular"]):
+            if mode == "radial":
+                # r=2.5 if it needs to be realistic. For radial animations, r=1 is prettier.
+                R_SMALL = 1
+            else:
+                R_SMALL = 4
+            R_CENTER = (
+                R_SMALL - (R_BIG - R_SMALL) / 10
+            )  # Perceived radius of the center led circle for radial animations
+            FUZZINESS = 0.7
+            BOOMERANG = False
+            ANIMATION_SPEED = 0.6
+            CENTER_MIN_VALUE = 0.05
+            ANIMATION_FPS = 30
 
-        leds_list = calculate_led_positions(star, R_BIG, R_SMALL, R_CENTER)
-        animate(
-            leds_list,
-            mode,
-            ANIMATION_SPEED,
-            ANIMATION_FPS,
-            R_BIG,
-            fuzziness=FUZZINESS,
-            seconds=seconds[idx],
-            center_min_value=CENTER_MIN_VALUE,
-            boomerang=BOOMERANG,
-        )
-        if mode == 'x' and idx == 2:
-            star.off()
-            sleep(1)
-    star.off()
+            leds_list = calculate_led_positions(star, R_BIG, R_SMALL, R_CENTER)
+            animate(
+                leds_list,
+                mode,
+                ANIMATION_SPEED,
+                ANIMATION_FPS,
+                R_BIG,
+                fuzziness=FUZZINESS,
+                seconds=seconds[idx],
+                center_min_value=CENTER_MIN_VALUE,
+                boomerang=BOOMERANG,
+            )
+            if mode == 'x' and idx == 2:
+                # star.off()
+                sleep(10)
+        #star.off()

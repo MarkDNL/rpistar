@@ -125,76 +125,75 @@ def animate(
     fuzziness=1,
     seconds=None,
     center_min_value=0,
-    boomerang=False
-):
-        if mode == "radial":
-            min_blink_radius = -0.5  # For circles
-            max_blink_radius = star_size * 1.3
-        elif mode in ["x", "y"]:
-            min_blink_radius = -star_size * 1.5
-            max_blink_radius = star_size * 1.5
-        elif mode == "angular":
-            min_blink_radius = -math.pi  # -R*2
-            max_blink_radius = math.pi  # R*2
-            blink_radius = min_blink_radius
-        try:
-            t_end = time()
-            if seconds is not None:
-                t_end += seconds
-            while True:
-                if seconds is not None and time() > t_end:
-                    break
+    boomerang=False):
 
-                if boomerang:
-                    if blink_radius > max_blink_radius:
-                        animation_speed = -animation_speed
-                    if blink_radius < min_blink_radius:
-                        animation_speed = -animation_speed
-                else:
-                    if blink_radius > max_blink_radius:
-                        blink_radius = min_blink_radius
+    if mode == "radial":
+        min_blink_radius = -0.5  # For circles
+        max_blink_radius = star_size * 1.3
+    elif mode in ["x", "y"]:
+        min_blink_radius = -star_size * 1.5
+        max_blink_radius = star_size * 1.5
+    elif mode == "angular":
+        min_blink_radius = -math.pi  # -R*2
+        max_blink_radius = math.pi  # R*2
+        blink_radius = min_blink_radius
+    try:
+        t_end = time()
+        if seconds is not None:
+            t_end += seconds
+        while True:
+            if seconds is not None and time() > t_end:
+                break
 
-                if mode == "radial":
-                    led_filter = [
-                        MAX_BRIGHTNESS
-                        * get_brightness(abs(led.get_polar()[0] - blink_radius), fuzziness)
-                        for led in leds
-                    ]
-                elif mode == "x":
-                    led_filter = [
-                        MAX_BRIGHTNESS
-                        * get_brightness(
-                            abs(led.get_cartesian()[0] - blink_radius), fuzziness
-                        )
-                        for led in leds
-                    ]
-                elif mode == "y":
-                    led_filter = [
-                        MAX_BRIGHTNESS
-                        * get_brightness(
-                            abs(led.get_cartesian()[1] - blink_radius), fuzziness
-                        )
+            if boomerang:
+                if blink_radius > max_blink_radius:
+                    animation_speed = -animation_speed
+                if blink_radius < min_blink_radius:
+                    animation_speed = -animation_speed
+            else:
+                if blink_radius > max_blink_radius:
+                    blink_radius = min_blink_radius
 
-                    ]
-                elif mode == "angular":
-                    led_filter = [
-                        MAX_BRIGHTNESS
-                        * get_brightness_angle(led.get_polar()[1], blink_radius, fuzziness)
-                        for led in leds
-                    ]
-                    led_filter[-1] = center_min_value
-                else:
-                    raise ValueError(
-                        f"Mode '{mode}' not supported. Choose 'x', 'y', 'radial' or 'angular'"
+            if mode == "radial":
+                led_filter = [
+                    MAX_BRIGHTNESS
+                    * get_brightness(abs(led.get_polar()[0] - blink_radius), fuzziness)
+                    for led in leds
+                ]
+            elif mode == "x":
+                led_filter = [
+                    MAX_BRIGHTNESS
+                    * get_brightness(
+                        abs(led.get_cartesian()[0] - blink_radius), fuzziness
                     )
+                    for led in leds
+                ]
+            elif mode == "y":
+                led_filter = [
+                    MAX_BRIGHTNESS
+                    * get_brightness(
+                        abs(led.get_cartesian()[1] - blink_radius), fuzziness
+                    )
+                ]
+            elif mode == "angular":
+                led_filter = [
+                    MAX_BRIGHTNESS
+                    * get_brightness_angle(led.get_polar()[1], blink_radius, fuzziness)
+                    for led in leds
+                ]
+                led_filter[-1] = center_min_value
+            else:
+                raise ValueError(
+                    f"Mode '{mode}' not supported. Choose 'x', 'y', 'radial' or 'angular'"
+                )
 
-                led_filter[-1] = max(led_filter[-1], center_min_value)
-                for idx, led in enumerate(leds):
-                    led.get_led().value = led_filter[idx]
-                sleep(1 / animation_fps)
-                blink_radius += animation_speed
-        except KeyboardInterrupt:
-            star.close()
+            led_filter[-1] = max(led_filter[-1], center_min_value)
+            for idx, led in enumerate(leds):
+                led.get_led().value = led_filter[idx]
+            sleep(1 / animation_fps)
+            blink_radius += animation_speed
+    except KeyboardInterrupt:
+        star.close()
 
 if __name__ == "__main__":
     star = Star(pwm=True)
